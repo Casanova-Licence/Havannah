@@ -1,0 +1,90 @@
+#ifndef PLATEAU_H
+#define PLATEAU_H
+
+#include <iostream>
+#include <map>
+#include <stack>
+
+#include "../include/Player.h"
+
+using namespace std;
+
+class Plateau
+{
+	int N;			//Taille du plateau
+	int **T;		//Le plateau d'entier
+	multimap<int, int> coin;	//Liste tous les coins (Angles)
+	/*Liste des cotés*/
+	multimap<int, int> HG;	//Haut gauche
+	multimap<int, int> HM;	//Haut milieu
+	multimap<int, int> HD;	//Haut droite
+	multimap<int, int> BG;	//Bas gauche
+	multimap<int, int> BM;	//Bas milieu
+	multimap<int, int> BD;	//Bas droite
+	public:
+		
+		//!Constructeur par défault de Plateau
+		/*! Taille initiale N=4*/
+		Plateau();
+
+		//!Constructeur à partir d'un int
+		/*!
+			taille du plateau = x\n
+			Initialise les cotés, et les coins de l'hexagone\n
+			\n
+			Ex: x=4:\n
+			[0 0 0 0 -1 -1 -1]\n
+			[0 0 0 0 0 -1 -1]\n
+			[0 0 0 0 0 0 -1]\n
+			[0 0 0 0 0 0 0]\n
+			[-1 0 0 0 0 0 0]\n
+			[-1 -1 0 0 0 0 0]\n
+			[-1 -1 -1 0 0 0 0]\n
+			0: Plaçable ; -1: Implaçable
+			
+			\param x représentant la taille du plateau à construir
+		*/
+		Plateau(int x);
+
+		//!Interface de la taille du plateau
+		/*! \return un entier représentant la taille du plateau */
+		int getTaille();
+		
+		//!Fonction pour qu'un joueur puisse placé son pion
+		/*!
+			\param J Player concerné
+			\param x coordonée x
+			\param y coordonée y
+		*/
+		void Placer(Player *J, int x, int y);
+
+		//!Fonction pour vérifier si on applique la règle du gateau
+		/*!
+			Détermine si on fait la règle du gateau, et calcul le numérot du tour
+			\param nbj entier représentant le nombre de joueurs
+			\param nbtour entier représentant le numérot du tour
+			\return true: on applique la règle du gateau
+			\return false: on ne l'applique pas
+		*/
+		bool Gateau(int nbj, int &nbtour);
+
+		/*Retoure +/- utiles*/
+		int val(int x, int y){return T[x][y];};
+		int taille(){return N;};
+
+		/*Fonctions vérif victoire*/
+		bool Possible(int x, int &y, int nbtour, bool gateau);
+		bool PossibleVoisin(int x, int y, int numj);
+		void Voisin(int x, int y, stack < pair<int, int> > &voisin, multimap <int, int> &chemin);
+		void verifWin(multimap <int, int> chemin, bool &win);
+		bool verifCoin(multimap <int, int>::iterator mitChem);
+		bool verifCote(multimap <int, int>::iterator mitChem, int choix);
+		//bool verifBoucle(pair <int, int> last);
+
+		/*Affichages*/
+		void Affichecoins();
+		void AfficheCote();
+		void Afficher();
+};
+
+#endif
