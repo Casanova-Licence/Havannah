@@ -1,3 +1,5 @@
+make : mrproper Havanah.exe
+
 Havanah.exe : ./object/main.o ./object/Game.o ./object/Player.o ./object/Plateau.o
 	g++ -std=c++11 -pedantic -o $@ $^
 

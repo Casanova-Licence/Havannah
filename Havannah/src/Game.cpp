@@ -153,19 +153,20 @@ bool Game::win(int x, int y)
 	bool win=false;
 	stack < pair<int, int> > voisin; //Pile contenant les cases à vérifier
 	pair<int, int> ptmp;		 //Paire de position
-	multimap <int, int> chemin;	 //Multimap pour éviter de remettre 2x la meme position
+	deque< pair<int, int> > chemin;	 //Queue pour éviter de remettre 2x la meme position
 	ptmp=make_pair(x, y);
 	voisin.push(ptmp);
-	chemin.insert(ptmp);
+	chemin.push_back(ptmp);
 	//P.Affichercoins();
 	while (!voisin.empty()) //Récupérer les voisins
 	{
 		ptmp=voisin.top();
 		cerr<<"x="<<ptmp.first<<" y="<<ptmp.second<<endl;
 		voisin.pop();
-		P.Voisin(ptmp.first, ptmp.second, voisin, chemin);
-		AfficherMap(chemin);
+		P.Voisin(ptmp.first, ptmp.second, x, y, voisin, chemin);
+		//AfficherQueue(chemin);
 	}
+	AfficherQueue(chemin);
 	//Vérifie si le chemin permet de gagner
 	P.verifWin(chemin, win);
 	cerr<<"____________Fin Win verif__________"<<endl;
@@ -198,14 +199,14 @@ void Game::JCIA()
 
 
 
-void AfficherMap(multimap <int,int> Map)
+/*void AfficherMap(multimap <int,int> Map)
 {
 	multimap<int, int>::iterator mit;
 	for (mit=Map.begin(); mit!=Map.end(); mit++)
 	{
 		cout<<"x:"<<(*mit).first<<" ,y:"<<(*mit).second<<endl;
 	}
-}
+}*/
 
 /*void AfficherStack(stack < pair<int, int> > stack)
 {
