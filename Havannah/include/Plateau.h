@@ -122,6 +122,8 @@ class Plateau
 			Veille à ce que le voisin soit valide et qu'il ne soit pas déjà présent dans le chemin de coordonées
 			\param x coordonée x
 			\param y coordonée y
+			\param xOrigine coordonée x du départ de la vérif
+			\param yOrigine coordonée y du départ de la vérif
 			\param voisin Pile de coordonées dont il faudra chercher les voisins 
 			\param chemin liste les coordonées déjà parcourues
 
@@ -130,7 +132,7 @@ class Plateau
 
 			\sa PossibleVoisin()
 		*/
-		void Voisin(int x, int y, stack < pair<int, int> > &voisin, multimap <int, int> &chemin);
+		void Voisin(int x, int y, int xOrigine, int yOrigine, stack < pair<int, int> > &voisin, deque < pair<int, int> > &chemin);
 
 		//!Fonction pour vérifier la victoire par un pont et uen fourche
 		/*!
@@ -140,7 +142,7 @@ class Plateau
 			\sa verifCoin()
 			\sa verifCote()
 		*/
-		void verifWin(multimap <int, int> chemin, bool &win);
+		void verifWin(deque < pair<int, int> > chemin, bool &win);
 
 		//!Fonction pour vérifier si la coordonée est un coin
 		/*!
@@ -150,7 +152,7 @@ class Plateau
 			\return true: la coordonée est l'un des coins
 			\return false: sinon
 		*/
-		bool verifCoin(multimap <int, int>::iterator mitChem);
+		bool verifCoin(deque < pair<int, int> >::iterator mitChem);
 
 		//!Fonction pour vérifier si la coordonée fait partie de l'un des coins
 		/*!
@@ -167,9 +169,13 @@ class Plateau
 			\return true: la coordonée fait partie du coin sélectionné
 			\return false: sinon
 		*/
-		bool verifCote(multimap <int, int>::iterator mitChem, int choix);
+		bool verifCote(deque < pair<int, int> >::iterator mitChem, int choix);
 
-		//bool verifBoucle(pair <int, int> last);
+		bool verifBoucle(int x, int y, deque < pair<int, int> > chemin);
+
+		void recupBoucle(deque < pair<int, int> > chemin, deque < pair<int, int> > & boucle);
+
+		void voisinBoucle(int x, int y, int xOrigine, int yOrigine, deque < pair<int, int> > chemin, deque < pair<int, int> > & boucle, deque < pair<int, int> > & visited);
 
 		/*Affichages*/
 		//!Fonction debug
@@ -184,5 +190,9 @@ class Plateau
 		/*! Affiche l'hexagone*/
 		void Afficher();
 };
+
+void AfficherMap(multimap <int,int> Map);
+
+void AfficherQueue(deque < pair<int, int> > Queue);
 
 #endif
