@@ -36,7 +36,7 @@ Plateau::Plateau() {
 			if ( (j==2*N-2 && (i>N-1 && i<2*N-2)) ) BD.insert(make_pair(i, j));
 		}
 	}
-	AfficheCote();
+	//AfficheCote();
 }
 
 Plateau::Plateau(int x) {
@@ -73,7 +73,7 @@ Plateau::Plateau(int x) {
 			if ( (j==2*N-2 && (i>N-1 && i<2*N-2)) ) BD.insert(make_pair(i, j));
 		}
 	}
-	AfficheCote();
+	//AfficheCote();
 }
 
 int Plateau::getTaille()
@@ -129,12 +129,12 @@ bool Plateau::Gateau(int nbj, int &nbtour)		//Règle du gateau et compte le nomb
     return gateau;
 }
 
-void Plateau::Voisin(int x, int y, stack < pair<int, int> > &voisin, multimap <int, int> &chemin)
+void Plateau::Voisin(int x, int y, int xOrigine, int yOrigine, stack < pair<int, int> > &voisin, deque < pair<int, int> > &chemin, bool & winBoucle)
 {
 	cerr<<"-----Voisins-----"<<endl;
 	cerr<<"x: "<<x<<", y:"<<y<<endl;
 	int nbj=T[x][y];
-	multimap<int, int>::iterator mit;
+	deque < pair<int, int> >::iterator mit;
 	pair <int, int> ptmp;
 	for (int i=0; i<6; i++)
 	{
@@ -147,12 +147,16 @@ void Plateau::Voisin(int x, int y, stack < pair<int, int> > &voisin, multimap <i
 		else if(i==5) ptmp=make_pair(x+1, y+1);
 		cerr<<"pos x:"<<ptmp.first<<", y:"<<ptmp.second<<endl;
 		if(PossibleVoisin(ptmp.first, ptmp.second, nbj)==false)continue;	//On regarde si le voisin existe
-
-		/*if (ptmp.firt==x && ptmp.second==y)	//Vérification boucle: si on retombe sur le voisin du départ
+			//Si on retombe sur un voisin aillant les mêmes coordonées que le point d'origine de la vérification de la victoire
+		if (ptmp.first==xOrigine && ptmp.second==yOrigine)	//Vérification boucle: si on retombe sur le voisin du départ
 		{
-			chemin.insert(ptmp);
-			bool boucle=verifBoucle(pair <int, int> last);
-		}*/
+			winBoucle=verifBoucle(xOrigine, yOrigine, chemin);
+			if (winBoucle==true)
+			{
+				cout<<"Victoire par boucle"<<endl;
+				return;
+			}
+		}
 		
 		for (mit=chemin.begin(); mit!=chemin.end(); mit++)		//On regarde si le voisin n'est pas déja présent
 		{
@@ -162,25 +166,26 @@ void Plateau::Voisin(int x, int y, stack < pair<int, int> > &voisin, multimap <i
 		if(present==false)		//Si le voisin est possible
 		{
 			voisin.push(ptmp);
-			chemin.insert(ptmp);	//On le rajoute au chemin et aux voisins
+			chemin.push_back(ptmp);	//On le rajoute au chemin et aux voisins
 			cerr<<"voisin x:"<<ptmp.first<<", y:"<<ptmp.second<<endl;
 		}
-		else
+		/*else
 		{
 				//On vérifie la boucle
 				bool boucle=verifBoucle(ptmp, voisin);
 			
-		}
+		}*/
 	}
 	cerr<<"-----Voisins-Fin-----"<<endl;
 }
 
-void Plateau::verifWin(multimap <int, int> chemin, bool &win)
+void Plateau::verifWin(deque < pair<int, int> > chemin, bool &win)
 {
 	int angle=0;
 	int nbCote=0;
 	bool chg=false, ch=false, chd=false, cbg=false, cb=false, cbd=false; //Bool de tous les différents coins
-	multimap<int, int>::iterator mitCoins, mitChem;
+	multimap<int, int>::iterator mitCoins;
+	deque < pair<int, int> >::iterator mitChem;
 	/*Vérificationd des angles*/
 	for (mitChem=chemin.begin(); mitChem!=chemin.end(); mitChem++)
 	{
@@ -189,6 +194,7 @@ void Plateau::verifWin(multimap <int, int> chemin, bool &win)
 	cerr<<"nbAngle:"<<angle<<endl;
 	if (angle>=2)
 	{
+		cout<<"Victoire par un pont"<<endl;
 		win=true;	//Si deux coins sont reliés alors c'est gagné!!!
 		return;
 	}
@@ -236,12 +242,13 @@ void Plateau::verifWin(multimap <int, int> chemin, bool &win)
 	cerr<<"nb Cotés:"<<nbCote<<endl;
 	if (nbCote>=3)
 	{
+		cout<<"Victoire par fourche"<<endl;
 		win=true;	//Si trois cotés différents sont reliés C'est la Victoire!!!
 		return;
 	}
 }
 
-bool Plateau::verifCoin(multimap <int, int>::iterator mitChem)
+bool Plateau::verifCoin(deque < pair<int, int> >::iterator mitChem)
 {
 	//Vérifie si la coordonée est un coin de l'hexagone
 	multimap<int, int>::iterator mitCoins;
@@ -252,7 +259,7 @@ bool Plateau::verifCoin(multimap <int, int>::iterator mitChem)
 	return false;
 }
 
-bool Plateau::verifCote(multimap <int, int>::iterator mitChem, int choix)
+bool Plateau::verifCote(deque < pair<int, int> >::iterator mitChem, int choix)
 {
 	//Choix détermine quelle coté vérifier
 	multimap<int, int>::iterator mitCote;
@@ -297,22 +304,250 @@ bool Plateau::verifCote(multimap <int, int>::iterator mitChem, int choix)
 	}
 }
 
-/*bool Plateau::verifBoucle(pair <int, int> last)
+bool Plateau::verifBoucle(int x, int y, deque < pair<int, int> > chemin)
 {
-	int x=last.first;
-	int y=last.second;
+	cerr<<"----Verif Boucle-------"<<endl;
 	int nbj=T[x][y];
-	bool Boucle=false;
-	int compt=0;
-	//on vérifie x fixe; y->+
-	//x fixe; y->-
-	//x->+; y fixe
-	//x->-; y fixe
-	//x->+; y->+
-	//x->-; y->-
-}*/
+	cerr<<"chemin:"<<endl;
+	AfficherQueue(chemin);
+		//La plus petite boucle est composée de 6 cases
+	if (chemin.size()<6) return false;
+	deque <pair <int, int> > boucle;
+		//On cherche à récupérer la boucle (sans les brances partant d'elle)
+	recupBoucle(chemin, boucle);
 
-/*void Plateau::Afficher() {
+	cerr<<"boucle:"<<endl;
+	AfficherQueue(boucle);
+		//Si la boucle récupérée est vide
+	if (boucle.empty()) return false;
+
+		//On vérifie que l'intérieur de la boucle ne soit pas remplie de la même couleur que le joueur
+	for (int i=0; i<6; i++)
+	{
+		cerr<<"i:"<<i<<endl;
+			//compteur de cases vides
+		int comptVid=0;
+			//Compteur de cases du joueur
+		int comptNbJ=0;
+		int tmpX=x;
+		int tmpY=y;
+		if (i==0)
+		{
+				//x fixe; y->+
+				//Tant q'on reste sur le plateau et que le nombre de cases joueur est <2
+			while (comptNbJ<2 && tmpY<2*N-2)
+			{
+				cerr<<"tmpX:"<<tmpX<<", tmpY"<<tmpY<<", comptVid:"<<comptVid<<", comptNbJ:"<<comptNbJ<<endl;
+				if (T[tmpX][tmpY]==nbj)
+				{
+						//Si le point de coordonées (tmpX, tmpY) appartiend u joueur, on vérifie qu'il appartienne à la boucle trouée précédement
+					if (presentQueue(boucle, tmpX, tmpY)) comptNbJ++;
+				}
+				else comptVid++;
+				tmpY++;
+			}
+			cerr<<"comptVid:"<<comptVid<<", comptNbJ:"<<comptNbJ<<endl;
+			if (comptVid>=1 && comptNbJ==2) return true;
+		}
+		if (i==1)
+		{
+				//x fixe; y->-
+				//Tant q'on reste sur le plateau et que le nombre de cases joueur est <2
+			while (comptNbJ<2 && tmpY>=0)
+			{
+				cerr<<"tmpX:"<<tmpX<<", tmpY"<<tmpY<<", comptVid:"<<comptVid<<", comptNbJ:"<<comptNbJ<<endl;
+				if (T[tmpX][tmpY]==nbj)
+				{
+					if (presentQueue(boucle, tmpX, tmpY)) comptNbJ++;
+				}
+				else comptVid++;
+				tmpY--;
+			}
+			cerr<<"comptVid:"<<comptVid<<", comptNbJ:"<<comptNbJ<<endl;
+			if (comptVid>=1 && comptNbJ==2) return true;
+		}
+		if (i==2)
+		{
+				//x->+; y fixe
+			while (comptNbJ<2 && tmpX<2*N-2)
+			{
+				cerr<<"tmpX:"<<tmpX<<", tmpY"<<tmpY<<", comptVid:"<<comptVid<<", comptNbJ:"<<comptNbJ<<endl;
+				if (T[tmpX][tmpY]==nbj)
+				{
+					if (presentQueue(boucle, tmpX, tmpY)) comptNbJ++;
+				}
+				else comptVid++;
+				tmpX++;
+			}
+			cerr<<"comptVid:"<<comptVid<<", comptNbJ:"<<comptNbJ<<endl;
+			if (comptVid>=1 && comptNbJ==2) return true;
+		}
+		if (i==3)
+		{
+				//x->-; y fixe
+			while (comptNbJ<2 && tmpX>=0)
+			{
+				cerr<<"tmpX:"<<tmpX<<", tmpY"<<tmpY<<", comptVid:"<<comptVid<<", comptNbJ:"<<comptNbJ<<endl;
+				if (T[tmpX][tmpY]==nbj)
+				{
+					if (presentQueue(boucle, tmpX, tmpY)) comptNbJ++;
+				}
+				else comptVid++;
+				tmpX--;
+			}
+			cerr<<"comptVid:"<<comptVid<<", comptNbJ:"<<comptNbJ<<endl;
+			if (comptVid>=1 && comptNbJ==2) return true;
+		}
+		if (i==4)
+		{
+				//x->+; y->+
+			while (comptNbJ<2 && (tmpX<2*N-2 && tmpY<2*N-2))
+			{
+				cerr<<"tmpX:"<<tmpX<<", tmpY"<<tmpY<<", comptVid:"<<comptVid<<", comptNbJ:"<<comptNbJ<<endl;
+				if (T[tmpX][tmpY]==nbj)
+				{
+					if (presentQueue(boucle, tmpX, tmpY)) comptNbJ++;
+				}
+				else comptVid++;
+				tmpX++;
+				tmpY++;
+			}
+			cerr<<"comptVid:"<<comptVid<<", comptNbJ:"<<comptNbJ<<endl;
+			if (comptVid>=1 && comptNbJ==2) return true;
+		}
+		if (i==5)
+		{
+				//x->-; y->-
+			while (comptNbJ<2 && (tmpX>=0 && tmpY>=0))
+			{
+				cerr<<"tmpX:"<<tmpX<<", tmpY"<<tmpY<<", comptVid:"<<comptVid<<", comptNbJ:"<<comptNbJ<<endl;
+				if (T[tmpX][tmpY]==nbj)
+				{
+					if (presentQueue(boucle, tmpX, tmpY)) comptNbJ++;
+				}
+				else comptVid++;
+				tmpX--;
+				tmpY--;
+			}
+			cerr<<"comptVid:"<<comptVid<<", comptNbJ:"<<comptNbJ<<endl;
+			if (comptVid>=1 && comptNbJ==2) return true;
+		}
+	}
+	return false;
+	cerr<<"----fin Verif Boucle-------"<<endl;
+}
+
+void Plateau::recupBoucle(deque < pair<int, int> > chemin, deque < pair<int, int> > & boucle)
+{
+	cerr<<"----recup Boucle----"<<endl;
+	deque < pair<int, int> > visited;
+	pair <int, int> pChem=chemin.front();
+	int x=pChem.first;
+	int xOrigine=x;
+	int y=pChem.second;
+	int yOrigine=y;
+
+		//On commence à remplir la boucle par la 1er coordonée
+	boucle.push_back(chemin.front());
+	pair <int, int> pBoucl=boucle.back();
+		//On considère cette coodonée comme visitée
+	visited.push_back(pBoucl);
+	
+		//on cherche le premier voisin de cette coordonée appartenant à la boucle
+	voisinBoucle(x, y, xOrigine, yOrigine, chemin, boucle, visited);
+	pBoucl=boucle.back();
+	cerr<<"x:"<<pBoucl.first<<", y:"<<pBoucl.second<<endl;
+		//Tant qu'on ne retombe pas su le début de la boucle,
+	while (pBoucl.first!=xOrigine || pBoucl.second!=yOrigine)
+	{
+		cerr<<"la"<<endl;
+		cerr<<"x:"<<pBoucl.first<<", xOrigine:"<<xOrigine<<", y:"<<pBoucl.second<<", yOrigine:"<<yOrigine<<endl;
+			//On cherche un des voisins de la dernière coordonée de la boucle (derniere coordonée aillant entrée dans la queue)
+		voisinBoucle(pBoucl.first, pBoucl.second, xOrigine, yOrigine, chemin, boucle, visited);
+			//Si on se retrouve avec une boucle vide, on sort
+				//Boucle trop petite
+		if (boucle.empty()) return;
+		pBoucl=boucle.back();
+		cerr<<"pBoucl x:"<<pBoucl.first<<", y:"<<pBoucl.second<<endl;
+		cerr<<"boucle:"<<endl;
+		AfficherQueue(boucle);
+	}
+		//Si la boucle a été trouvée, on enlève la dernère coordonée
+			//Si la boucle est bonne, la dernière coordonée correspond à la première rentrée
+	boucle.pop_back();
+	cerr<<"----Fin recup Boucle----"<<endl;
+}
+
+void Plateau::voisinBoucle(int x, int y, int xOrigine, int yOrigine, deque < pair<int, int> > chemin, deque < pair<int, int> > & boucle, deque < pair<int, int> > & visited)
+{
+	cerr<<"-----Voisins Boucle-----"<<endl;
+	deque <pair <int, int> >::iterator itVis;
+	int numJ=T[x][y];
+	pair <int, int> ptmp;
+	cerr<<"voisin de: x"<<x<<", y"<<y<<endl;
+	int i=0;
+		//On parcours les 6 voisins potentiels d'une case
+	while (i<6)
+	{
+		cerr<<"i:"<<i<<endl;
+		bool bVisited=false;
+		if(i==0) ptmp=make_pair(x-1, y-1);	//On parcours tous les voisins potentiels
+		else if(i==1) ptmp=make_pair(x-1, y);
+		else if(i==2) ptmp=make_pair(x, y-1);
+		else if(i==3) ptmp=make_pair(x, y+1);
+		else if(i==4) ptmp=make_pair(x+1, y);
+		else if(i==5) ptmp=make_pair(x+1, y+1);
+	
+		cerr<<"x:"<<ptmp.first<<", y:"<<ptmp.second<<endl;
+			//On vérifie que ce soit bien un voisin
+		if (PossibleVoisin(ptmp.first, ptmp.second, numJ)==false)
+		{
+			i++;
+				//Si on as parcourus tous les voisins potentiels sans en avoirs trouvé un valide
+			if (i>=6)
+			{
+					//On enlève la dernière coordonée de la boucle
+					//La coordonée est en bout d'une brance isolée
+					//Ou elle fait partie d'une boucle trop petite
+				boucle.pop_back();
+			}
+			continue;
+		}
+			//On vérifie que le voisin ait les mêmes coordonées que la première de la boucle et que cette boucle soit constituée de 6 coordonées minimum
+		if ((ptmp.first==xOrigine && ptmp.second==yOrigine) && boucle.size()>=6)
+		{
+			boucle.push_back(ptmp);
+			return;
+		}
+			//On vérifie que le voisin n'ai pas déjà été trouvé
+		for (itVis=visited.begin(); itVis!=visited.end(); itVis++)
+		{
+			if(ptmp.first==(*itVis).first && ptmp.second==(*itVis).second)
+			{
+				bVisited=true;
+			}
+		}
+		if (!bVisited)
+		{
+				//Sinon, on l'ajoute à la boucle
+			visited.push_back(ptmp);
+			boucle.push_back(ptmp);
+			return;
+		}
+		i++;
+			//Si on as parcourus tous les voisins potentiels sans en avoirs trouvé un valide
+		if (i>=6)
+		{
+				//On enlève la dernière coordonée de la boucle
+				//La coordonée est en bout d'une brance isolée
+				//Ou elle fait partie d'une boucle trop petite
+			boucle.pop_back();
+		}
+	}
+	cerr<<"-----Fin Voisins Boucle-----"<<endl;
+}
+
+void Plateau::Afficher2() {
 	//Afficge de manière bourine
 	for (int i=0; i<((N*2)-1); i++) {
 		cout<<"|";
@@ -321,7 +556,7 @@ bool Plateau::verifCote(multimap <int, int>::iterator mitChem, int choix)
 		}
 		cout<<endl;
 	}
-}*/
+}
 
 void Plateau::Afficher()
 {
@@ -348,6 +583,7 @@ void Plateau::Afficher()
 		}
 		cout<<endl;
 	}
+	Afficher2();
 }
 
 void Plateau::Affichecoins()
@@ -394,3 +630,32 @@ void Plateau::AfficheCote()
 		cout<<"x:"<<(*mit).first<<" ,y:"<<(*mit).second<<endl;
 	}
 }
+
+void AfficherMap(multimap <int,int> Map)
+{
+	multimap<int, int>::iterator mit;
+	for (mit=Map.begin(); mit!=Map.end(); mit++)
+	{
+		cout<<"x:"<<(*mit).first<<" ,y:"<<(*mit).second<<endl;
+	}
+}
+
+void AfficherQueue(deque < pair<int, int> > Queue)
+{
+	deque< pair<int, int> >::iterator qit;
+	for (qit=Queue.begin(); qit!=Queue.end(); qit++)
+	{
+		cout<<"x:"<<(*qit).first<<" ,y:"<<(*qit).second<<endl;
+	}
+}
+
+bool presentQueue(deque < pair<int, int> > Queue, int x, int y)
+{
+	deque< pair<int, int> >::iterator qit;
+	for (qit=Queue.begin(); qit!=Queue.end(); qit++)
+	{
+		if ((*qit).first==x && (*qit).second==y) return true;
+	}
+	return false;
+}
+
