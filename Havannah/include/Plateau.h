@@ -122,25 +122,28 @@ class Plateau
 			Veille à ce que le voisin soit valide et qu'il ne soit pas déjà présent dans le chemin de coordonées
 			\param x coordonée x
 			\param y coordonée y
+			\param xOrigine coordonée x du départ de la vérif
+			\param yOrigine coordonée y du départ de la vérif
 			\param voisin Pile de coordonées dont il faudra chercher les voisins 
-			\param chemin liste les coordonées déjà parcourues
+			\param chemin queue contenant les coordonées déjà parcourues et voisines l'unes de l'autres
+			\param winBoucle booléein permetta,t de déterminer si le joueur a gagner en faisant une boucle
 
 			\return true: la case est bien un voisin
 			\return false: sinon
 
 			\sa PossibleVoisin()
 		*/
-		void Voisin(int x, int y, stack < pair<int, int> > &voisin, multimap <int, int> &chemin);
+		void Voisin(int x, int y, int xOrigine, int yOrigine, stack < pair<int, int> > &voisin, deque < pair<int, int> > &chemin, bool & winBoucle);
 
 		//!Fonction pour vérifier la victoire par un pont et uen fourche
 		/*!
-			\param chemin liste de coordonées voisines l'unes de l'autre
+			\param chemin queue contenant des coordonées voisines l'unes de l'autre
 			\param win bool informant si le joueur à gagner ou non
 
 			\sa verifCoin()
 			\sa verifCote()
 		*/
-		void verifWin(multimap <int, int> chemin, bool &win);
+		void verifWin(deque < pair<int, int> > chemin, bool &win);
 
 		//!Fonction pour vérifier si la coordonée est un coin
 		/*!
@@ -150,7 +153,7 @@ class Plateau
 			\return true: la coordonée est l'un des coins
 			\return false: sinon
 		*/
-		bool verifCoin(multimap <int, int>::iterator mitChem);
+		bool verifCoin(deque < pair<int, int> >::iterator mitChem);
 
 		//!Fonction pour vérifier si la coordonée fait partie de l'un des coins
 		/*!
@@ -167,9 +170,39 @@ class Plateau
 			\return true: la coordonée fait partie du coin sélectionné
 			\return false: sinon
 		*/
-		bool verifCote(multimap <int, int>::iterator mitChem, int choix);
+		bool verifCote(deque < pair<int, int> >::iterator mitChem, int choix);
 
-		//bool verifBoucle(pair <int, int> last);
+
+		//!Fonction pour vérifier si le joueur à gagné en faisant une boucle
+		/*!
+			Vérifiela validité d'une boucle
+			\param x entier correspondant à la coordonée x du point placé
+			\param y entier correspondant à la coordonée y du point placé
+			\param chemin queue représentant le chemin des cases appartenant au joueur
+
+			\return true: La boucle est valide
+			\return false: sinon
+		*/
+		bool verifBoucle(int x, int y, deque < pair<int, int> > chemin);
+
+		//!Fonction pour récupérer la boucle (sans les brances s'en échapant)
+		/*!
+			\param chemin queue contenant des coordonées voisines l'unes de l'autre
+			\param boucle queue servant à contenir les != coordonées constituant la boucle
+		*/
+		void recupBoucle(deque < pair<int, int> > chemin, deque < pair<int, int> > & boucle);
+		
+		//!Fonction pour compléter la boucle
+		/*!
+			\param x coordonée x du point dont on cherche les voisins apparteant à la meme boucle
+			\paraù y coordonée y du point dont on cherche les voisins apparteant à la meme boucle
+			\param xOrigine coordonée x du premier point de la boucle
+			\param yOrigine coordonée y du premier point de la boucle
+			\param chemin queue contenant des coordonées voisines l'unes de l'autre
+			\param boucle queue contenant les != coordonées constituant la boucle
+			\param visited queue contenant les coordonées déjàs visitées
+		*/
+		void voisinBoucle(int x, int y, int xOrigine, int yOrigine, deque < pair<int, int> > chemin, deque < pair<int, int> > & boucle, deque < pair<int, int> > & visited);
 
 		/*Affichages*/
 		//!Fonction debug
@@ -183,6 +216,18 @@ class Plateau
 		//!Affichage
 		/*! Affiche l'hexagone*/
 		void Afficher();
+
+		//!Affichage débug
+		/*! Affiche le tableau contenant l'hexagone */
+		void Afficher2();
+
 };
+
+void AfficherMap(multimap <int,int> Map);
+
+void AfficherQueue(deque < pair<int, int> > Queue);
+
+//!Fonction pour vérifier si une coordonée (x,y) appartiend à une queue contenant des coordonées
+bool presentQueue(deque < pair<int, int> > Queue, int x, int y);
 
 #endif
