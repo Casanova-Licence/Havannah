@@ -1,0 +1,358 @@
+
+
+_____________________Classe Player_______________________________________
+Classe permettant de gérer les données des joueurs
+
+variables:
+	-string name: Nom du joueur
+
+	-int num: numérot du joeur
+		utilisé pour conaitre les cases appartenant au joueur sur l'hxagone
+
+	-int score: nombre de victoires du joueur
+
+	-static int nbPlayer: nombre total de joueurs construits
+
+	-bool valid: booléein pour saoir si le joueur est valide
+
+	-bool ia: booléein pour savoir si le joueur est une ia ou non
+
+Méthodes:
+	-Player()
+		Constructeur par défault,
+			le joueur construit est non valide
+
+	-Player(string nom)
+		Constructeur de joueur à partir d'une string
+			Initialise:
+			-le nom du joueur
+			-le numérot du joueur
+			-incrémente le nombre de joueurs créés
+			-rend le joueur valide
+			-IA=false
+
+	-void Rename(string)
+		Fonction pour renomer le joueur
+
+	-int nbJ()
+		retourne le nombre de jouers aillant étés construits: nbPlayer
+
+	-int numJ)()
+		retourne le numérot du joueur
+
+	-~Player()
+		Destructeur de joueur
+			décrémente le nombre de joueurs créés
+
+
+___________________________Classe Game___________________________________
+Classe gérant le déroulement du jeux, et mettant en relations les autres classes
+
+Variables:
+	-Plateau P: Plateau du jeux de classe Plateau
+
+	-deque<Player *> tours:
+		Queue de joueurs, représentant la liste des joueurs et leurs ordre de passage
+
+Méthodes:
+	-Game(): Constructeur de Game
+		Lance la partie
+
+	-void StartMenu():
+		Affiche un menu de démarage pour coisir son mode de jeux
+
+	-void JCJ()
+		Initialise une partie joueurs contre joueurs
+			-Création de != joueurs
+			-Création du plateau
+			-initialisation de la queue de joueurs
+				Le premier joueur à avoir initialisé sont joueur joueras en premier
+
+	-void GameJCJ()
+		Gère une partie joueurs vs joueurs
+			Gère tours par tours les actions des 2 joueurs:
+				-utilise la règle du gateau (au 1er tour),
+				-le joueur du tour choisie ou placer so pion: coordonées (x,y),
+				-Vérifie si le joueur peut poser son pion su cette case,
+				-Vérifie si le coup est gagnant.
+		Fait appel à des fonctions des classes Joueur et Plateau
+
+	-bool win(int x, int y):
+		Vérifie si le dernier coup joué aux coordonées (x, y) est gagant
+		crée une pile voisin contenant les coordonées dont on vas chercher les voisins
+		crée une queue chemin contenant la liste des coordonées voisines les unes des autres appartenant au joueur
+			On rentre les coordonées (x, y) du coup joué dans voisin et chemin
+			Tant que la pile voisin n'est pas vide:
+				On vas continué à cherché les voisins de la case se situant au sommet de la pile (Parcours en profondeur récurcif): fonction Plateau::Voisin(...)
+			Une fois le chemin complété:
+				On vérifie si le joueur à gagné: fonction Plateau::verifWin(...)
+
+
+___________________________Classe Plateau________________________________
+Classe permetant de gérer tous les placements des jueurs et de faire des
+vérifications en lien avec les condition de victoires
+
+Variables:
+	-int N: Taille du plateau
+
+	-int **T: Le plateau de jeux
+		Ex N=4:
+		Plateau géré par le programme:
+	y------->
+	x	[0 0 0 0 -1 -1 -1]
+	|	[0 0 0 0 0 -1 -1]
+	|	[0 0 0 0 0 0 -1]
+	v	[0 0 0 0 0 0 0]
+		[-1 0 0 0 0 0 0]
+		[-1 -1 0 0 0 0 0]
+		[-1 -1 -1 0 0 0 0]
+
+		-----------------------------
+
+		Tableau perçu par le joueur
+	y---->
+	x	[0 0 0 0 -1 -1 -1]
+	|	[0 0 0 0 0 -1 -1]
+	|	[0 0 0 0 0 0 -1]
+	v	[0 0 0 0 0 0 0 0]
+		[0 0 0 0 0 0 -1]
+		[0 0 0 0 0 -1 -1]
+		[0 0 0 0 -1 -1 -1]
+		0: Plaçable ; -1: Implaçable
+
+		-----------------------------
+		Hexagone Affiché:
+		   . . . .
+		  . . . . .
+		 . . . . . .
+		. . . . . . .
+		 . . . . . .
+		  . . . . .
+		   . . . .
+
+
+		Problèmes:
+			-Au début j'avais pensé utiliser le tableau perçu par le
+			joueur comme plateau du programme mais cette représentation
+			est moins pratique pour récupérer les diférents voisins d'une
+			coordonée:
+				-çelon le tableau 2, il y à 3 façons différentes de récupérer les voisins d'une coordonée, dépendant de ces coordonées
+				-Avec le tableau 1, il n'y as qu'une seule manière de récupérer les voisins d'une coordonée (x, y):
+					voisins:
+					[x-1, y-1][x-1, y]
+					[x, y-1][x, y][x, y+1]
+							[x+1, y][x+1, y+1]
+
+			-J'ai utilisé le tableau 2 comme plateau perçu par le joueur, car les coordonées de chaques cases sont plus faciles à repérer par raport à l'hexagone d'origine
+
+	-multimap<int, int> coin
+		Liste tous les coins (Angles)
+			coordonées en relation avec le tableau du programme
+			->0, 0			-haut gauche
+			->0, N-1		-haut droite
+			->N-1, 0		-milieu gauche
+			->N-1, 2*N-2	-milieu droite
+			->2*N-2, N-1	-bas gauche
+			->2*N-1, 2*N-2	-bas droite
+
+	Multimapes contenant les coordonées constituant les cotés de l'hexagone:
+		On évite de prendre les coins
+	-multimap<int, int> HG:
+		Haut gauche
+			x=1 -> N-2; y=0
+	-multimap<int, int> HM:
+		Haut milieu
+			x=0; y=1 -> N-2
+
+	-multimap<int, int> HD:
+		Haut droite
+			x=1 -> N-2; y=x+N-1
+
+	-multimap<int, int> BG:
+		Bas gauche
+			x=N -> 2*N-3; y=x-N-1
+
+	-multimap<int, int> BM:
+		Bas milieu
+			x=2*N-2; y=N -> 2*N-3
+
+	-multimap<int, int> BD:
+		Bas droite
+			x=N -> 2*N-3; y=2*N-2
+
+Méthodes:
+	-Plateau()
+		Constructeur par défault
+			N=4
+
+	-Plateau(int x)
+		Constructeur à partir d'un int
+			N=x
+			Initialise aussi les liste des cotés et celle des coins
+
+	-void Placer(Player *J, int x, int y)
+		Fonction pour qu'un joueur puisse placé son pion
+			Place le pion sans faire de vérif les vérfications doivent êtres faites avant
+
+	-bool Gateau(int nbj, int &nbtour)
+		Fonction pour vérifier si on applique la règle du gateau et compte le numérot du tours
+			Paramètre:
+				-int nbj: Le nombre de joueurs
+				-int &nbtour: le numérot du tours (vas être modifié au cours de cette fonction)
+
+				num du tour=(nbCases!=0/nombre de joueurs)+1
+				on n'aplique pas la règle du gateau si le joueur 2 a joué ou que l'on as plus de 2 joueurs
+
+	-int val(int x, int y)
+		Fonction retournant la valeur située à la position (x, y)
+
+	-int getTaille()
+		Retourne N la taille du plateau
+
+	-bool Possible(int x, int &y, int nbtour, bool gateau)
+		Fonction pour vérifier si le joueur peut poser son pions aux coordonées (x, y)
+			-dans le tableau: (0<=x<=2*N-2; 0<=y<=2*N-2)
+			-Dans l'hexagone: T[x][y]>=0
+			-vérif que la case ne soit pas déjà ocupé: si on n'est pas au tour 1 et que T[x][y]!=0
+			-Si on est au tour 1 on vérifie que l'on puisse activer la règle du gateau: gateau=true et T[x][y]!=0:
+				Si on as la règle du gateau, le joueur peut poser son pion sur celui de l'adversaire
+
+		Problème:
+			-Les cordonées (x, y) sont en lien avec le tableau perçu par le joueur (voir plus haut), il faut les adapter au tableau du programme:
+				si x>=N:
+					y+=x-(N-1)
+				y est modifié pour la suite du programme
+
+	-bool PossibleVoisin(int x, int y, int numj)
+		Fonction pour vérifier si un voisin de coordonées (x, y) est valide:
+			-Dans le tableau
+			-Dans l'hexagone
+			-Est une case appartenant au joueur correspondant au numérot passé en argument T[x][y]==numJ
+
+		Cette fonction est appelée par la fonction Voisin(...)
+
+	-void Voisin(int x, int y, int xOrigine, int yOrigine, stack < pair<int, int> > &voisin, deque < pair<int, int> > &chemin, bool & winBoucle)
+		Fonction récupérant les voisins de la case (x,y)
+		Parametres:
+			-xOrigine coordonée x du départ de la recherche des voisins
+			-yOrigine coordonée y du départ de la recherche des voisins
+			-voisin Pile de coordonées dont il faudra chercher les voisins 
+			-chemin queue contenant les coordonées formant un chemin (voisines les unes des autres)
+			-bool winBoucle détermine si le joueur a gagner en faisant une boucle
+
+		on vérifie pour les 6 voisins de la case de coordonée (x, y):
+			[x-1, y-1][x-1, y]
+				[x, y-1][x, y][x, y+1]
+						[x+1, y][x+1, y+1]
+
+			-Si c'est un voisin valide: fonction: PossibleVoisin(...)
+			-Si il as les memes coordonées que la case dont on commencées les recherces de voisins (xOrigine, yOrigine):
+				On vérifie si on est en présence d'une boucle: fonction verifBoucle(...)
+			-Si le voisin n'as pas déjà été visité:
+				On regarde si il est référencé dans la queue "chemin"
+				Sinon: on le rajoute à la pile contenant les voisins dont on cherche les autres voisins, on l'ajoute aussi au chemin
+
+	-void verifWin(deque < pair<int, int> > chemin, bool &win)
+		Fonction pour vérifier la victoire par un pont ou une fourche
+			On parcous les coordonées du chemin
+				-On vérifie que ce soit un coin: fonction verifCoin(...)
+					si oui: incrémentation d'un copteur
+						si compteur>=2 victoire
+				-On vérifie que ce soit un côté: fonction verifCote(...)
+					on utilise 6 booléeins un pour chaques côtés et un compteur
+					si c'est un coin: on passe un bool à true et on incrémente le compteur
+						On ne refait pas la vérification du coté aillant son bool à true
+					on compte le nombre de bool à true si nb>=3 victoire
+
+	-verifCoin(deque < pair<int, int> >::iterator mitChem)
+		Fonction pour vérifier si la coordonée (x, y) pointée par l'itératuer passé en argument est un coin
+
+	-bool verifCote(deque < pair<int, int> >::iterator mitChem, int choix)
+		Vérifie si la cordonée (x, y) pointée par l'itérateur fait parte de l'un des coins (celon le choix)
+			1: haut gauche
+			2: haut milier
+			3: haut droite
+			4: bas gauche
+			5: bas milieu
+			6: bas droite
+
+	-bool verifBoucle(int x, int y, deque < pair<int, int> > chemin)
+		Fonction pour vérifier si le joueur à gagné en faisant une boucle
+			-On vérifie que le chemin fasse minimum 6 cases de long (plus petite boucle)
+			-On récupère la boucle isolée (sans les branches partant de la boucle): fonction recupBoucle(...)
+			-On vérifie qu'on as bien récupérer une boucle:
+				Si la boucle récupérée est vide (elle était trop petite)
+			-on vérifie que la boucle récupérée soit valide (d'autres valeurs que celle du joueur à l'intérieur)
+				On utilise 2 compteurs:
+					-nombre de cases du joueur
+					-nombre d'autres cases (vide ou appartenant à un autre joueur)
+				On parcours les 6 dirrections possibles en partant de la coordonée (x, y):
+					-haut droite: x fixe; y->+
+					-bas gauche: x fixe; y->-
+					-bas: x->+; y fixe
+					-haut: x->-; y fixe
+					-bas droite: x->+; y->+
+					-haut gauche: x->-; y->- 
+						pour chacunes de ces dirretions:
+							on parts du point de coordonées (x, y) duquel on as commencé la recherche de voisins jusqu'au bords de l'hexagone et tant qu'on as pas trouvé 2 cases appartenant au joueur
+								On comptre les nombres de cases du joueurs appartenant à la boucle trouvée
+								On compte le nombre d'autres cases
+							Si on as trouvé plus d'une cases n'appartenant pas au joueur et 2 cases lui appartenant: on as une boucle valide et c'est gagné
+
+	-recupBoucle(deque < pair<int, int> > chemin, deque < pair<int, int> > & boucle)
+		Fonction pour récupérer la boucle (sans les brances s'en échapant)
+			Paramètres:
+				boucle: queue contenant la boucle
+
+		On commence par remplir la boucle par la 1er coordonée du chemin et de son 1er voisin fonction
+		Tant que l'on ne vas pas retomber su la coordonée de départ:
+			On continue à chercher des voisins de la dernière coordonée rentrée dans la queue boucle: fonction voisinBoucle(...)
+			Si la boucle deviens vide: la boucle devait être trop petite
+
+	-voisinBoucle(int x, int y, int xOrigine, int yOrigine, deque < pair<int, int> > chemin, deque < pair<int, int> > & boucle, deque < pair<int, int> > & visited)
+		Paramètres:
+			-(x, y) coordonées dont on cherche les voisins
+			-(xOrigine, yOrigine) coordonées de la 1er coordonée du chemin (de laquelle toute la vérif à commencée)
+			-chemin queue de coordonées voisines l'unes des autres
+			-boucle queue contenant les coordonées formant la boucle
+			-visited queue contenant les coordonées déjà visitées
+
+		Fonction pour compléter la boucle en chercant les voisins de la coordonée (x, y) appartenant à la boucle
+			on cherche les voisins de la case (x, y)
+				on parcours la liste des 6 voisins potentiels (voir voisin(...))
+				On vérifie la validité du voisin: fonction PossibleVoisin(...)
+					si aucuns voisins sont possible (on arrive au 6eme voisin potentiel et il n'est pas valide):
+						On enlève de la boucle la case de coordonée (x, y):
+							La case se situe dans une branche ou dans une boucle trop petite
+					sinon, on passe au voisin suivant
+				Si le voisin à les memes coordonées que la case d'origine et qe la taille de la boucle >=6
+					La boucle est supposée valide, on ajoute la coordonée du voisin pour pouvoir sortir de la boucle appelant cette fonction
+				On vérifie qu'on ai pas déjà visité le voisin
+				Si on ne l'as pas déjà visité, on le rajoute à la fin de la queue boucle et à la queue visited
+				Si le voisin n'as pas respecté les conditions précédentes, on passe au voisin suivant
+					Si le voisin est le dernier à virifié:
+						On enlève la coordonée (x, y) de la queue boucle:
+							La coordonée se situe dans une branche ou dans une boucle trop petite
+
+	-Afficher()
+		Affiche l'hexagone:
+			   . . . .
+			  . . . . .
+			 . . . . . .
+			. . . . . . .
+			 . . . . . .
+			  . . . . .
+			   . . . .
+
+
+Fonctions hors classes:
+
+	-presentQueue(deque < pair<int, int> > Queue, int x, int y)
+		Fonction pour vérifier si la coordonée (x, y) est référencée dans la queue de paire de int
+			utile pour les fonctions liées à la boucle
+
+
+
+
+Liens github:
+	https://github.com/Casanova-Licence/Havannah
