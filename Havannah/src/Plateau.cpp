@@ -153,6 +153,7 @@ void Plateau::Voisin(int x, int y, int xOrigine, int yOrigine, stack < pair<int,
 			winBoucle=verifBoucle(xOrigine, yOrigine, chemin);
 			if (winBoucle==true)
 			{
+				Afficher();
 				cout<<"Victoire par boucle"<<endl;
 				return;
 			}
@@ -188,6 +189,7 @@ void Plateau::verifWin(deque < pair<int, int> > chemin, bool &win)
 	//cerr<<"nbAngle:"<<angle<<endl;
 	if (angle>=2)
 	{
+		Afficher();
 		cout<<"Victoire par un pont"<<endl;
 		win=true;	//Si deux coins sont reliés alors c'est gagné!!!
 		return;
@@ -236,6 +238,7 @@ void Plateau::verifWin(deque < pair<int, int> > chemin, bool &win)
 	//cerr<<"nb Cotés:"<<nbCote<<endl;
 	if (nbCote>=3)
 	{
+		Afficher();
 		cout<<"Victoire par fourche"<<endl;
 		win=true;	//Si trois cotés différents sont reliés C'est la Victoire!!!
 		return;

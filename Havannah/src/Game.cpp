@@ -151,8 +151,8 @@ void Game::GameJCJ()
         tours.push_back(current);
         tours.pop_front();
     }
-    P.Afficher();
-    cout<<"Bravo!"<<endl;
+    //P.Afficher();
+    //cout<<"Bravo!"<<endl;
     current->Afficher();
 }
 
