@@ -21,10 +21,10 @@ class Player
 		/*!
 			Initialise:\n
 			-le nom du joueur\n
-			-le numérot du joueur
-			-incrémente le nombre de joueurs créés
-			-rend le joueur valide
-			-IA=false
+			-le numérot du joueur\n
+			-incrémente le nombre de joueurs créés\n
+			-rend le joueur valide\n
+			-ia=false
 			\param nom string correspondant au joueur
 		*/
 		Player(string nom);

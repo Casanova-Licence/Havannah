@@ -97,7 +97,7 @@ Variables:
 
 	-int **T: Le plateau de jeux
 		Ex N=4:
-		Plateau géré par le programme:
+		Plateau géré par le programme: tableau 1
 	y------->
 	x	[0 0 0 0 -1 -1 -1]
 	|	[0 0 0 0 0 -1 -1]
@@ -109,7 +109,7 @@ Variables:
 
 		-----------------------------
 
-		Tableau perçu par le joueur
+		Autre représentation tabulaire: tableau 2
 	y---->
 	x	[0 0 0 0 -1 -1 -1]
 	|	[0 0 0 0 0 -1 -1]
@@ -122,20 +122,19 @@ Variables:
 
 		-----------------------------
 		Hexagone Affiché:
-		   . . . .
-		  . . . . .
-		 . . . . . .
-		. . . . . . .
-		 . . . . . .
-		  . . . . .
-		   . . . .
+		        0 1 2 3  y
+		   0  /. . . .\4
+		  1  /. . . . .\5
+		 2  /. . . . . .\6
+	      x	3  |. . . . . . .|
+		 4  \. . . . . ./
+		  5  \. . . . ./
+		   6  \. . . ./
+
 
 
 		Problèmes:
-			-Au début j'avais pensé utiliser le tableau perçu par le
-			joueur comme plateau du programme mais cette représentation
-			est moins pratique pour récupérer les diférents voisins d'une
-			coordonée:
+			-Au début j'avais pensé utiliser le tableau 2 comme plateau du programme mais cette représentation est moins pratique pour récupérer les diférents voisins d'une case:
 				-çelon le tableau 2, il y à 3 façons différentes de récupérer les voisins d'une coordonée, dépendant de ces coordonées
 				-Avec le tableau 1, il n'y as qu'une seule manière de récupérer les voisins d'une coordonée (x, y):
 					voisins:
@@ -143,7 +142,6 @@ Variables:
 					[x, y-1][x, y][x, y+1]
 							[x+1, y][x+1, y+1]
 
-			-J'ai utilisé le tableau 2 comme plateau perçu par le joueur, car les coordonées de chaques cases sont plus faciles à repérer par raport à l'hexagone d'origine
 
 	-multimap<int, int> coin
 		Liste tous les coins (Angles)
@@ -216,12 +214,6 @@ Méthodes:
 			-vérif que la case ne soit pas déjà ocupé: si on n'est pas au tour 1 et que T[x][y]!=0
 			-Si on est au tour 1 on vérifie que l'on puisse activer la règle du gateau: gateau=true et T[x][y]!=0:
 				Si on as la règle du gateau, le joueur peut poser son pion sur celui de l'adversaire
-
-		Problème:
-			-Les cordonées (x, y) sont en lien avec le tableau perçu par le joueur (voir plus haut), il faut les adapter au tableau du programme:
-				si x>=N:
-					y+=x-(N-1)
-				y est modifié pour la suite du programme
 
 	-bool PossibleVoisin(int x, int y, int numj)
 		Fonction pour vérifier si un voisin de coordonées (x, y) est valide:
@@ -336,13 +328,15 @@ Méthodes:
 
 	-Afficher()
 		Affiche l'hexagone:
-			   . . . .
-			  . . . . .
-			 . . . . . .
-			. . . . . . .
-			 . . . . . .
-			  . . . . .
-			   . . . .
+			exemple avec un hexagone de taille 4:
+				0 1 2 3
+			   0  /. . . .\4
+			  1  /. . . . .\5
+			 2  /. . . . . .\6
+			3  |. . . . . . .|
+			 4  \. . . . . ./
+			  5  \. . . . ./
+			   6  \. . . ./
 
 
 Fonctions hors classes:

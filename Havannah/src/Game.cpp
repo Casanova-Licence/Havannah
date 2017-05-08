@@ -95,7 +95,7 @@ void Game::JCJ() {
 	}
 	cout<<"choisissez la taille du plateau entre 4 et 10 compris:"<<endl;
 	cin>>n;
-	while (n<4 && n>10)
+	while ((n<4 && n>10))
 	{
 		cin>>n;
 	}
@@ -111,25 +111,31 @@ void Game::GameJCJ()
 {
     int n=P.getTaille();
     int nbtour=1;
-    //int nbj=J1->nbJ();
+    	//récupéation du nombre de joueurs
     int nbj=tours.front()->nbJ();
     Player *current;
     bool Fin=false;
     while (!Fin)
     {
-        bool gateau=P.Gateau(nbj, nbtour);	//On détermine le topur et si on doit appliquer la règle du gateau
-        cout<<"tour: "<<nbtour<<endl;
-        int x=2*n-2,y=0;			//Initialisation des coordonées où insérer
+    		//On détermine le topur et si on doit appliquer la règle du gateau
+        bool gateau=P.Gateau(nbj, nbtour);
+        	//Initialisation des coordonées où insérer
+        	//Le plateua "perçu par le joueur != plateau d'origine"
+        
+	int x, y;
         P.Afficher();
-        current=tours.front();			//On récupère le joueur du tour
+        	//On récupère le joueur du tour
+        current=tours.front();
+	cout<<"tour: "<<nbtour<<endl;
         current->Afficher();
         cout<<"choisissez les coordonnées"<<endl;
         cout<<"x: ";
         cin>>x;
         cout<<"y: ";
         cin>>y;
-	if (x==-5) return;
-        while (P.Possible(x, y, nbtour, gateau)==false)	//On vérifie que les coordonées soient valide
+	//!if (x==-5) return;
+			//On vérifie que les coordonées soient valide
+        while (P.Possible(x, y, nbtour, gateau)==false)
         {
             cout<<"choisissez les coordonnées:"<<endl;
             cout<<"x: ";
@@ -137,26 +143,34 @@ void Game::GameJCJ()
             cout<<"y: ";
             cin>>y;
         }
-        P.Placer(current, x, y);	//Si valide placer
-	Fin=win(x, y);		//On vérifie si le coup est gagnant
-        tours.push_back(current);	//On replace le joueur dans la queue
+        	//Si valide placer
+        P.Placer(current, x, y);
+        	//On vérifie si le coup est gagnant
+		Fin=win(x, y);
+			//On replace le joueur dans la queue
+        tours.push_back(current);
         tours.pop_front();
     }
     P.Afficher();
     cout<<"Bravo!"<<endl;
+    current->Afficher();
 }
 
 bool Game::win(int x, int y)
 {
-	cerr<<"____________Win verif__________"<<endl;
+	//cerr<<"____________Win verif__________"<<endl;
 	int xtmp, ytmp;
 		//identifiant du joueur
 	int idp=P.val(x, y);
 	bool win=false;
 	bool winBoucle=false;
-	stack < pair<int, int> > voisin; //Pile contenant les cases à vérifier
-	pair<int, int> ptmp;		 //Paire de position
-	deque< pair<int, int> > chemin;	 //Queue pour éviter de remettre 2x la meme position
+		//Pile contenant les cases à vérifier (dont on cherche les voisins)
+	stack < pair<int, int> > voisin;
+		//Paire de position
+	pair<int, int> ptmp;
+		//Queue pour éviter de remettre 2x la meme position
+		//Contiend la liste de coordonées voisines l'une des autres formant un chemin
+	deque< pair<int, int> > chemin;
 	ptmp=make_pair(x, y);
 	voisin.push(ptmp);
 	chemin.push_back(ptmp);
@@ -164,16 +178,17 @@ bool Game::win(int x, int y)
 	while (!voisin.empty()) //Récupérer les voisins
 	{
 		ptmp=voisin.top();
-		cerr<<"x="<<ptmp.first<<" y="<<ptmp.second<<endl;
+		//cerr<<"x="<<ptmp.first<<" y="<<ptmp.second<<endl;
 		voisin.pop();
+			//On récupère les voisins de la case
 		P.Voisin(ptmp.first, ptmp.second, x, y, voisin, chemin, winBoucle);
 		//AfficherQueue(chemin);
 		if (winBoucle) return winBoucle;
 	}
-	AfficherQueue(chemin);
-	//Vérifie si le chemin permet de gagner
+	//AfficherQueue(chemin);
+		//Vérifie si le chemin permet de gagner par les ponts ou fourche
 	P.verifWin(chemin, win);
-	cerr<<"____________Fin Win verif__________"<<endl;
+	//cerr<<"____________Fin Win verif__________"<<endl;
 	return win;
 }
 

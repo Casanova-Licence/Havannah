@@ -11,16 +11,16 @@ using namespace std;
 
 class Plateau
 {
-	int N;			//Taille du plateau
-	int **T;		//Le plateau d'entier
+	int N;						//Taille du plateau
+	int **T;					//Le plateau d'entier
 	multimap<int, int> coin;	//Liste tous les coins (Angles)
 	/*Liste des cotés*/
-	multimap<int, int> HG;	//Haut gauche
-	multimap<int, int> HM;	//Haut milieu
-	multimap<int, int> HD;	//Haut droite
-	multimap<int, int> BG;	//Bas gauche
-	multimap<int, int> BM;	//Bas milieu
-	multimap<int, int> BD;	//Bas droite
+	multimap<int, int> HG;		//Haut gauche
+	multimap<int, int> HM;		//Haut milieu
+	multimap<int, int> HD;		//Haut droite
+	multimap<int, int> BG;		//Bas gauche
+	multimap<int, int> BM;		//Bas milieu
+	multimap<int, int> BD;		//Bas droite
 	public:
 		
 		//!Constructeur par défault de Plateau
@@ -40,16 +40,7 @@ class Plateau
 			[0 0 0 0 0 0 0]\n
 			[-1 0 0 0 0 0 0]\n
 			[-1 -1 0 0 0 0 0]\n
-			[-1 -1 -1 0 0 0 0]\n
-			-----------------------------\n
-			Tableau perçu par le joueur\n
-			[0 0 0 0 -1 -1 -1]\n
-			[0 0 0 0 0 -1 -1]\n
-			[0 0 0 0 0 0 -1]\n
-			[0 0 0 0 0 0 0 0]\n
-			[0 0 0 0 0 0 -1]\n
-			[0 0 0 0 0 -1 -1]\n
-			[0 0 0 0 -1 -1 -1]\n
+			[-1 -1 -1 0 0 0 0]\n\n
 			0: Plaçable ; -1: Implaçable
 			
 			\param x représentant la taille du plateau à construir
@@ -89,7 +80,6 @@ class Plateau
 		/*! \return un entier représentant la taille du plateau */
 		int getTaille();
 		
-		/*Fonctions vérif victoire*/
 		//!Vérifie si le joueur peut poser
 		/*!
 			En fonction des coordonées (x,y), du tour et de la règle du gateau, le joueur peut placer le pion à différetns endroits
